@@ -1,0 +1,29 @@
+name: Build C++ Windows x64 App
+
+on:
+  push:
+    branches: [ main, master, رئيسي ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup MSVC Compiler
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Compile Executable
+        run: |
+          cl.exe /O2 /EHsc /W3 /DUNICODE /D_UNICODE main.cpp /link Comctl32.lib Advapi32.lib User32.lib Gdi32.lib Shell32.lib /MACHINE:X64 /OUT:GX-Core-x64.exe
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GX-Core-Windows-x64
+          path: GX-Core-x64.exe

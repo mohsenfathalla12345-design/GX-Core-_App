@@ -1,5 +1,3 @@
-#define UNICODE
-#define _UNICODE
 #include <windows.h>
 #include <commctrl.h>
 #include <string>
@@ -27,12 +25,12 @@ void Log(const std::wstring& s){
     std::wofstream f(baseDir+L"\\logs\\gx.log", std::ios::app);
     if(f) f<<L"["<<Now()<<L"] "<<s<<L"\n";
 }
-void SetStatus(const std::wstring& s){ if(gStatus) SetWindowText(gStatus,s.c_str()); Log(s); }
+void SetStatus(const std::wstring& s){ if(gStatus) SetWindowTextW(gStatus,s.c_str()); Log(s); }
 
 void AddRow(const std::wstring& s){
-    int n=(int)SendMessage(gList,LB_GETCOUNT,0,0);
-    SendMessage(gList,LB_ADDSTRING,0,(LPARAM)s.c_str());
-    SendMessage(gList,LB_SETCURSEL,n,0);
+    int n=(int)SendMessageW(gList,LB_GETCOUNT,0,0);
+    SendMessageW(gList,LB_ADDSTRING,0,(LPARAM)s.c_str());
+    SendMessageW(gList,LB_SETCURSEL,n,0);
 }
 
 std::wstring RunCommand(const std::wstring& cmd){
@@ -52,8 +50,11 @@ std::wstring RunCommand(const std::wstring& cmd){
         while(ReadFile(r,tmp,sizeof(tmp)-1,&got,nullptr)&&got){
             tmp[got]=0;
             int n=MultiByteToWideChar(CP_OEMCP,0,tmp,got,nullptr,0);
-            std::wstring x(n,L'\0'); MultiByteToWideChar(CP_OEMCP,0,tmp,got,x.data(),n);
-            out+=x;
+            if(n > 0){
+                std::vector<wchar_t> x(n);
+                MultiByteToWideChar(CP_OEMCP,0,tmp,got,x.data(),n);
+                out.append(x.data(),n);
+            }
         }
         WaitForSingleObject(pi.hProcess,10000);
         CloseHandle(pi.hProcess); CloseHandle(pi.hThread);
@@ -106,16 +107,6 @@ void SystemStatus(){
     SetStatus(L"G-X ready");
 }
 
-void PaintButton(HDC h, HWND w){
-    RECT r; GetClientRect(w,&r);
-    HBRUSH b=CreateSolidBrush(RGB(27,45,34)); FillRect(h,&r,b); DeleteObject(b);
-    SetTextColor(h,GREEN); SetBkMode(h,TRANSPARENT);
-    HFONT old=(HFONT)SelectObject(h,gFont);
-    wchar_t t[128]; GetWindowText(w,t,128);
-    DrawText(h,t,-1,&r,DT_CENTER|DT_VCENTER|DT_SINGLELINE);
-    SelectObject(h,old);
-}
-
 LRESULT CALLBACK Proc(HWND h, UINT m, WPARAM wp, LPARAM lp){
     switch(m){
     case WM_CTLCOLORSTATIC:
@@ -144,7 +135,7 @@ LRESULT CALLBACK Proc(HWND h, UINT m, WPARAM wp, LPARAM lp){
 }
 HWND Btn(HWND p,int id,const wchar_t* t,int x,int y,int w,int h){
     HWND b=CreateWindowW(L"BUTTON",t,WS_CHILD|WS_VISIBLE|BS_OWNERDRAW,x,y,w,h,p,(HMENU)(INT_PTR)id,GetModuleHandleW(nullptr),nullptr);
-    SendMessage(b,WM_SETFONT,(WPARAM)gFont,TRUE); return b;
+    SendMessageW(b,WM_SETFONT,(WPARAM)gFont,TRUE); return b;
 }
 int WINAPI wWinMain(HINSTANCE hi,HINSTANCE, PWSTR, int){
     wchar_t path[MAX_PATH]; GetModuleFileNameW(nullptr,path,MAX_PATH);
@@ -161,14 +152,13 @@ int WINAPI wWinMain(HINSTANCE hi,HINSTANCE, PWSTR, int){
     WNDCLASSW wc{}; wc.hInstance=hi; wc.lpfnWndProc=Proc; wc.lpszClassName=L"GXWindow";
     wc.hbrBackground=gBg; wc.hCursor=LoadCursor(nullptr,IDC_ARROW); RegisterClassW(&wc);
 
-    // Deliberately windowed: 1040x700, centered, not maximized/fullscreen.
     gMain=CreateWindowW(L"GXWindow",L"G-X",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,
                         CW_USEDEFAULT,CW_USEDEFAULT,1040,700,nullptr,nullptr,hi,nullptr);
     ShowWindow(gMain,SW_SHOW); UpdateWindow(gMain);
 
     CreateWindowW(L"STATIC",L"G-X",WS_CHILD|WS_VISIBLE,34,25,250,45,gMain,nullptr,hi,nullptr);
-    HWND sub=CreateWindowW(L"STATIC",L"G-X Core  •  Windows Guardian",WS_CHILD|WS_VISIBLE,37,70,500,28,gMain,nullptr,hi,nullptr);
-    SendMessage(sub,WM_SETFONT,(WPARAM)gSmall,TRUE);
+    HWND sub=CreateWindowW(L"STATIC",L"G-X Core • Windows Guardian",WS_CHILD|WS_VISIBLE,37,70,500,28,gMain,nullptr,hi,nullptr);
+    SendMessageW(sub,WM_SETFONT,(WPARAM)gSmall,TRUE);
 
     Btn(gMain,101,L"System Status",35,120,190,48);
     Btn(gMain,102,L"Security Audit",235,120,190,48);
@@ -180,10 +170,10 @@ int WINAPI wWinMain(HINSTANCE hi,HINSTANCE, PWSTR, int){
 
     gList=CreateWindowW(L"LISTBOX",L"",WS_CHILD|WS_VISIBLE|WS_VSCROLL|LBS_NOINTEGRALHEIGHT|WS_BORDER,
                         35,255,940,315,gMain,nullptr,hi,nullptr);
-    SendMessage(gList,WM_SETFONT,(WPARAM)gSmall,TRUE);
+    SendMessageW(gList,WM_SETFONT,(WPARAM)gSmall,TRUE);
     gStatus=CreateWindowW(L"STATIC",L"Ready • G-X is running",WS_CHILD|WS_VISIBLE,
                           35,585,700,42,gMain,nullptr,hi,nullptr);
-    SendMessage(gStatus,WM_SETFONT,(WPARAM)gSmall,TRUE);
+    SendMessageW(gStatus,WM_SETFONT,(WPARAM)gSmall,TRUE);
     Log(L"G-X started");
     AddRow(L"G-X Core initialized.");
     AddRow(L"Windowed UI: 1040 x 700 (not fullscreen).");
@@ -194,3 +184,4 @@ int WINAPI wWinMain(HINSTANCE hi,HINSTANCE, PWSTR, int){
     MSG msg; while(GetMessageW(&msg,nullptr,0,0)){ TranslateMessage(&msg); DispatchMessageW(&msg); }
     return 0;
 }
+  

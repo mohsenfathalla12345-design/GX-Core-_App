@@ -22,8 +22,7 @@ static HWND gMain = nullptr;
 #define COLOR_TEXT      Color(255, 0, 230, 90)
 #define COLOR_TEXT_DIM  Color(255, 0, 120, 50)
 
-// الدعم التلقائي للرسم المستقبلي
-void DrawCyberPanel(Graphics& g, int x, int y, int w, int h, const wchar_t* title = nullptr) {
+void DrawCyberPanel(Graphics& g, INT x, INT y, INT w, INT h, const wchar_t* title = nullptr) {
     SolidBrush panelBrush(COLOR_PANEL);
     Pen borderPen(COLOR_BORDER, 1.5f);
     g.FillRectangle(&panelBrush, x, y, w, h);
@@ -36,24 +35,20 @@ void DrawCyberPanel(Graphics& g, int x, int y, int w, int h, const wchar_t* titl
     }
 }
 
-// رسم المفاعل المركزي (G-X Reactor Core)
-void DrawReactorCore(Graphics& g, int cx, int cy, int radius) {
+void DrawReactorCore(Graphics& g, INT cx, INT cy, INT radius) {
     g.SetSmoothingMode(SmoothingModeAntiAlias);
 
-    // الحلقات الخارجية والداخلية
-    Pen neonPen(COLOR_NEON, 3);
-    Pen dimPen(COLOR_DIM_NEON, 1);
+    Pen neonPen(COLOR_NEON, 3.0f);
+    Pen dimPen(COLOR_DIM_NEON, 1.0f);
 
     g.DrawEllipse(&dimPen, cx - radius, cy - radius, radius * 2, radius * 2);
     g.DrawEllipse(&neonPen, cx - (radius - 15), cy - (radius - 15), (radius - 15) * 2, (radius - 15) * 2);
 
-    Pen dashedPen(COLOR_NEON, 2);
+    Pen dashedPen(COLOR_NEON, 2.0f);
     dashedPen.SetDashStyle(DashStyleDash);
     g.DrawEllipse(&dashedPen, cx - (radius - 30), cy - (radius - 30), (radius - 30) * 2, (radius - 30) * 2);
 
-    // النص المركزي المضيء
     Font fontTitle(L"Segoe UI", 22, FontStyleBold);
-    Font fontSub(L"Segoe UI", 10, FontStyleRegular);
     SolidBrush neonBrush(COLOR_NEON);
     
     StringFormat sf;
@@ -63,80 +58,76 @@ void DrawReactorCore(Graphics& g, int cx, int cy, int radius) {
     g.DrawString(L"G-X\nCORE", -1, &fontTitle, PointF((REAL)cx, (REAL)(cy - 10)), &sf, &neonBrush);
 }
 
-// رسم الواجهة الكاملة
 void OnPaint(HDC hdc, RECT& rc) {
     Bitmap buffer(rc.right, rc.bottom);
     Graphics g(&buffer);
     g.SetSmoothingMode(SmoothingModeAntiAlias);
 
-    // الخلفية العامة
     SolidBrush bgBrush(COLOR_BG);
-    g.FillRectangle(&bgBrush, 0, 0, rc.right, rc.bottom);
+    g.FillRectangle(&bgBrush, 0, 0, (INT)rc.right, (INT)rc.bottom);
 
-    // 1. الشريط العلوي (Header Bar)
+    // 1. Header Bar
     DrawCyberPanel(g, 10, 10, rc.right - 20, 50);
     Font headerFont(L"Consolas", 14, FontStyleBold);
     SolidBrush neonBrush(COLOR_NEON);
-    g.DrawString(L"G-X CORE  v3.0.0 | G-X Reactor Core System", -1, &headerFont, PointF(25, 22), &neonBrush);
+    g.DrawString(L"G-X CORE  v3.0.0 | G-X Reactor Core System", -1, &headerFont, PointF(25.0f, 22.0f), &neonBrush);
 
-    // 2. شاشة التيرمينال اليسرى (Terminal Screen)
+    // 2. Terminal Screen
     DrawCyberPanel(g, 10, 70, 320, 480, L"> G-X TERMINAL");
     Font termFont(L"Consolas", 9, FontStyleRegular);
     SolidBrush textBrush(COLOR_TEXT);
     SolidBrush textDimBrush(COLOR_TEXT_DIM);
 
-    int ty = 100;
-    g.DrawString(L"[23:45:18] G-X CORE INITIALIZING...", -1, &termFont, PointF(20, (REAL)ty), &textDimBrush); ty += 20;
-    g.DrawString(L"[23:45:18] SYSTEM SECURE [ OK ]", -1, &termFont, PointF(20, (REAL)ty), &textBrush); ty += 20;
-    g.DrawString(L"[23:45:19] CHECKING INTEGRITY...", -1, &termFont, PointF(20, (REAL)ty), &textDimBrush); ty += 20;
-    g.DrawString(L"[23:45:20] SCANNING CRITICAL AREAS...", -1, &termFont, PointF(20, (REAL)ty), &textBrush); ty += 20;
-    g.DrawString(L"  > SYSTEM FILES         [ OK ]", -1, &termFont, PointF(20, (REAL)ty), &textBrush); ty += 20;
-    g.DrawString(L"  > REGISTRY             [ OK ]", -1, &termFont, PointF(20, (REAL)ty), &textBrush); ty += 20;
-    g.DrawString(L"  > DRIVERS              [ OK ]", -1, &termFont, PointF(20, (REAL)ty), &textBrush); ty += 20;
-    g.DrawString(L"[23:45:24] 0 THREATS FOUND", -1, &termFont, PointF(20, (REAL)ty), &textBrush); ty += 20;
-    g.DrawString(L"[23:45:29] MODULE EXECUTED SUCCESS", -1, &termFont, PointF(20, (REAL)ty), &textBrush);
+    REAL ty = 100.0f;
+    g.DrawString(L"[23:45:18] G-X CORE INITIALIZING...", -1, &termFont, PointF(20.0f, ty), &textDimBrush); ty += 20.0f;
+    g.DrawString(L"[23:45:18] SYSTEM SECURE [ OK ]", -1, &termFont, PointF(20.0f, ty), &textBrush); ty += 20.0f;
+    g.DrawString(L"[23:45:19] CHECKING INTEGRITY...", -1, &termFont, PointF(20.0f, ty), &textDimBrush); ty += 20.0f;
+    g.DrawString(L"[23:45:20] SCANNING CRITICAL AREAS...", -1, &termFont, PointF(20.0f, ty), &textBrush); ty += 20.0f;
+    g.DrawString(L"  > SYSTEM FILES         [ OK ]", -1, &termFont, PointF(20.0f, ty), &textBrush); ty += 20.0f;
+    g.DrawString(L"  > REGISTRY             [ OK ]", -1, &termFont, PointF(20.0f, ty), &textBrush); ty += 20.0f;
+    g.DrawString(L"  > DRIVERS              [ OK ]", -1, &termFont, PointF(20.0f, ty), &textBrush); ty += 20.0f;
+    g.DrawString(L"[23:45:24] 0 THREATS FOUND", -1, &termFont, PointF(20.0f, ty), &textBrush); ty += 20.0f;
+    g.DrawString(L"[23:45:29] MODULE EXECUTED SUCCESS", -1, &termFont, PointF(20.0f, ty), &textBrush);
 
-    // 3. المفاعل المركزي (Center Reactor Core)
+    // 3. Reactor Core
     DrawCyberPanel(g, 340, 70, 380, 480);
     Font statusFont(L"Consolas", 12, FontStyleBold);
     StringFormat sfCenter; sfCenter.SetAlignment(StringAlignmentCenter);
-    g.DrawString(L"REACTOR STATUS\nEXECUTING", -1, &statusFont, PointF(530, 90), &sfCenter, &neonBrush);
+    g.DrawString(L"REACTOR STATUS\nEXECUTING", -1, &statusFont, PointF(530.0f, 90.0f), &sfCenter, &neonBrush);
     
     DrawReactorCore(g, 530, 290, 120);
 
-    // شريط التقدم في المفاعل
-    g.DrawString(L"PROCESS PROGRESS: 67%", -1, &termFont, PointF(360, 470), &neonBrush);
+    g.DrawString(L"PROCESS PROGRESS: 67%", -1, &termFont, PointF(360.0f, 470.0f), &neonBrush);
     SolidBrush progBg(COLOR_BORDER);
     SolidBrush progFill(COLOR_NEON);
     g.FillRectangle(&progBg, 360, 495, 340, 15);
-    g.FillRectangle(&progFill, 360, 495, 228, 15); // 67%
+    g.FillRectangle(&progFill, 360, 495, 228, 15);
 
-    // 4. الشاشة اليمين (System Monitor)
+    // 4. System Monitor
     DrawCyberPanel(g, 730, 70, 280, 480, L"SYSTEM MONITOR");
-    int my = 100;
-    g.DrawString(L"CPU USAGE: 32%", -1, &termFont, PointF(745, (REAL)my), &neonBrush); my += 20;
-    g.FillRectangle(&progBg, 745, (REAL)my, 250, 10);
-    g.FillRectangle(&progFill, 745, (REAL)my, 80, 10); my += 25;
+    INT my = 100;
+    g.DrawString(L"CPU USAGE: 32%", -1, &termFont, PointF(745.0f, (REAL)my), &neonBrush); my += 20;
+    g.FillRectangle(&progBg, 745, my, 250, 10);
+    g.FillRectangle(&progFill, 745, my, 80, 10); my += 25;
 
-    g.DrawString(L"MEMORY: 61% (9.7 GB / 15.9 GB)", -1, &termFont, PointF(745, (REAL)my), &neonBrush); my += 20;
-    g.FillRectangle(&progBg, 745, (REAL)my, 250, 10);
-    g.FillRectangle(&progFill, 745, (REAL)my, 152, 10); my += 25;
+    g.DrawString(L"MEMORY: 61% (9.7 GB / 15.9 GB)", -1, &termFont, PointF(745.0f, (REAL)my), &neonBrush); my += 20;
+    g.FillRectangle(&progBg, 745, my, 250, 10);
+    g.FillRectangle(&progFill, 745, my, 152, 10); my += 25;
 
-    g.DrawString(L"DISK ACTIVITY: 27%", -1, &termFont, PointF(745, (REAL)my), &neonBrush); my += 20;
-    g.FillRectangle(&progBg, 745, (REAL)my, 250, 10);
-    g.FillRectangle(&progFill, 745, (REAL)my, 67, 10); my += 35;
+    g.DrawString(L"DISK ACTIVITY: 27%", -1, &termFont, PointF(745.0f, (REAL)my), &neonBrush); my += 20;
+    g.FillRectangle(&progBg, 745, my, 250, 10);
+    g.FillRectangle(&progFill, 745, my, 67, 10); my += 35;
 
-    g.DrawString(L"NETWORK SPEED", -1, &termFont, PointF(745, (REAL)my), &neonBrush); my += 20;
-    g.DrawString(L"↑ 12.4 MB/s   ↓ 3.7 MB/s", -1, &termFont, PointF(745, (REAL)my), &textBrush); my += 35;
+    g.DrawString(L"NETWORK SPEED", -1, &termFont, PointF(745.0f, (REAL)my), &neonBrush); my += 20;
+    g.DrawString(L"↑ 12.4 MB/s   ↓ 3.7 MB/s", -1, &termFont, PointF(745.0f, (REAL)my), &textBrush); my += 35;
 
-    g.DrawString(L"TEMPERATURES", -1, &termFont, PointF(745, (REAL)my), &neonBrush); my += 20;
-    g.DrawString(L"CPU: 44°C   GPU: 44°C   MAIN: 37°C", -1, &termFont, PointF(745, (REAL)my), &textBrush);
+    g.DrawString(L"TEMPERATURES", -1, &termFont, PointF(745.0f, (REAL)my), &neonBrush); my += 20;
+    g.DrawString(L"CPU: 44°C   GPU: 44°C   MAIN: 37°C", -1, &termFont, PointF(745.0f, (REAL)my), &textBrush);
 
-    // 5. الشريط السفلي (Footer)
+    // 5. Footer Bar
     DrawCyberPanel(g, 10, 560, rc.right - 20, 40);
-    g.DrawString(L"G-X CORE v3.0.0 | ALL SYSTEMS OPERATIONAL | ENCRYPTION: AES-256 | BUILT BY G-X ENGINE", -1, &termFont, PointF(25, 572), &textDimBrush);
+    g.DrawString(L"G-X CORE v3.0.0 | ALL SYSTEMS OPERATIONAL | ENCRYPTION: AES-256 | BUILT BY G-X ENGINE", -1, &termFont, PointF(25.0f, 572.0f), &textDimBrush);
 
-    // نقل الرسم إلى الشاشة مباشرة لتفادي الـ Flicker
     Graphics screenGraphics(hdc);
     screenGraphics.DrawImage(&buffer, 0, 0);
 }
